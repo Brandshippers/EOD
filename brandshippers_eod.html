@@ -299,16 +299,22 @@
             <button class="add-call-btn" onclick="addCallBlock()">＋ Call toevoegen</button>
           </div>
 
-          <div class="form-card">
-            <div class="form-title">💰 Cash</div>
+          <div class="form-card" id="totals-card">
+            <div class="form-title">💰 Totalen (automatisch berekend)</div>
             <div class="field-row">
               <div class="field">
                 <label>Cash Collected incl. btw (€)</label>
-                <input type="number" id="f-cash" placeholder="0" min="0">
+                <input type="number" id="f-cash" placeholder="0" min="0" readonly style="opacity:.6;cursor:not-allowed">
               </div>
               <div class="field">
-                <label>Cash Collected excl. btw (€)</label>
-                <input type="number" id="f-cashex" placeholder="0" min="0">
+                <label>Contracted Value totaal (€)</label>
+                <input type="number" id="f-contracted-total" placeholder="0" min="0" readonly style="opacity:.6;cursor:not-allowed">
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label>Cash excl. btw (€) <span style="font-size:10px;color:var(--muted)">(21% btw)</span></label>
+                <input type="number" id="f-cashex" placeholder="0" min="0" readonly style="opacity:.6;cursor:not-allowed">
               </div>
             </div>
             <div class="field">
@@ -488,7 +494,9 @@ function renderEodCard(e, i) {
             ${c.naam ? `<div class="call-name">${c.naam}</div>` : ''}
             ${c.setter ? `<div class="call-setter">via ${c.setter}</div>` : ''}
             ${c.note ? `<div class="call-note">${c.note}</div>` : ''}
-            ${c.amount ? `<div class="call-amount">${c.amount}</div>` : ''}
+            ${c.cash ? `<div class="call-amount">💵 Cash: €${Number(c.cash).toLocaleString('nl-NL')}</div>` : ''}
+            ${c.contracted ? `<div class="call-amount" style="color:var(--blue)">📦 Pakket: €${Number(c.contracted).toLocaleString('nl-NL')}</div>` : ''}
+            ${c.amount ? `<div style="font-size:11px;color:var(--muted);margin-top:3px">${c.amount}</div>` : ''}
           </div>
         `).join('')}
       </div>` : ''}
@@ -572,7 +580,9 @@ function shareWhatsApp(id) {
       if(c.naam) msg += `Naam: ${c.naam}\n`;
       if(c.setter) msg += `Setter: ${c.setter}\n`;
       if(c.note) msg += `${c.note}\n`;
-      if(c.amount) msg += `💰 ${c.amount}\n`;
+      if(c.cash) msg += `💵 Cash Collected: €${Number(c.cash).toLocaleString('nl-NL')} incl. btw\n`;
+      if(c.contracted) msg += `📦 Contracted Value: €${Number(c.contracted).toLocaleString('nl-NL')}\n`;
+      if(c.amount) msg += `📝 ${c.amount}\n`;
       msg += '\n';
     });
   }
@@ -654,6 +664,21 @@ function addCallBlock() {
     <input type="hidden" id="cb-type-${id}" value="">
   `;
   document.getElementById('callBlocks').appendChild(div);
+}
+
+function recalcTotals() {
+  let totalCash = 0;
+  let totalContracted = 0;
+  document.querySelectorAll('.call-block').forEach(block => {
+    const id = block.id.replace('cb-','');
+    const cash = parseFloat(document.getElementById(`cb-cash-${id}`)?.value || 0);
+    const contracted = parseFloat(document.getElementById(`cb-contracted-${id}`)?.value || 0);
+    totalCash += cash;
+    totalContracted += contracted;
+  });
+  document.getElementById('f-cash').value = totalCash || '';
+  document.getElementById('f-cashex').value = totalCash ? Math.round(totalCash / 1.21) : '';
+  document.getElementById('f-contracted-total').value = totalContracted || '';
 }
 
 function removeCallBlock(id) {
