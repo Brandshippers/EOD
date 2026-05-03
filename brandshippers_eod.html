@@ -663,9 +663,19 @@ function addCallBlock() {
       <label>Notitie / toelichting</label>
       <textarea id="cb-note-${id}" placeholder="Wat is er besproken, wat viel op..." style="min-height:60px"></textarea>
     </div>
-    <div class="field" style="margin-bottom:0">
-      <label>Bedrag (optioneel)</label>
-      <input type="text" id="cb-amount-${id}" placeholder="€ 500 incl. BTW">
+    <div class="field-row" id="cb-cashrow-${id}" style="display:none;margin-top:4px">
+      <div class="field" style="margin-bottom:0">
+        <label>Cash Collected incl. btw (€)</label>
+        <input type="number" id="cb-cash-${id}" placeholder="0" min="0" oninput="recalcTotals()">
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label>Contracted Value / pakket (€)</label>
+        <input type="number" id="cb-contracted-${id}" placeholder="0" min="0" oninput="recalcTotals()">
+      </div>
+    </div>
+    <div class="field" style="margin-bottom:0;margin-top:12px">
+      <label>Notitie (optioneel)</label>
+      <input type="text" id="cb-amount-${id}" placeholder="bijv. wordt morgen betaald...">
     </div>
     <input type="hidden" id="cb-type-${id}" value="">
   `;
