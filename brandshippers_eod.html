@@ -456,6 +456,7 @@ function renderEodCard(e, i) {
         ${closes.length ? `<span class="tag tag-green">🤝 ${closes.length} close${closes.length>1?'s':''}</span>` : ''}
         ${e.cash ? `<span class="cash-badge">${fmt(e.cash)}</span>` : ''}
         <span class="tag tag-blue">${e.taken} calls</span>
+        <button onclick="event.stopPropagation();shareWhatsApp(${e.id})" style="background:transparent;border:1px solid #25D366;color:#25D366;border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:var(--font)">📤 WhatsApp</button>
         <button onclick="event.stopPropagation();editEod(${e.id})" style="background:transparent;border:1px solid var(--blue);color:var(--blue);border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:var(--font)">✎ Aanpas</button>
         <button onclick="event.stopPropagation();deleteEod(${e.id})" style="background:transparent;border:1px solid var(--danger);color:var(--danger);border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:var(--font)">✕ Verwijder</button>
         <span class="chevron" id="chev-${i}">▾</span>
@@ -550,6 +551,39 @@ function editEod(id) {
     // Mark this as an edit — remove old entry on submit
     window._editingId = id;
   }, 50);
+}
+
+function shareWhatsApp(id) {
+  const e = eods.find(x=>x.id===id);
+  if(!e) return;
+  
+  let msg = '';
+  msg += `📋 *EOD ${e.date}*\n`;
+  msg += `👤 *${e.naam}*\n\n`;
+  msg += `📞 Total Calls: ${e.total} | Calls Taken: ${e.taken}`;
+  if(e.followups>0) msg += ` | Follow Ups: ${e.followups}`;
+  if(e.noshows>0) msg += ` | No Shows: ${e.noshows}`;
+  msg += '\n\n';
+
+  if(e.calls && e.calls.length) {
+    e.calls.forEach((c,i) => {
+      const typeLabel = {close:'🤝 Close', viewed:'👁 Viewed by E-mail', followup:'↩ Follow Up Close', cancelled:'✕ Cancelled', reschedule:'↻ Reschedule'}[c.type] || c.type;
+      msg += `*${typeLabel}*\n`;
+      if(c.naam) msg += `Naam: ${c.naam}\n`;
+      if(c.setter) msg += `Setter: ${c.setter}\n`;
+      if(c.note) msg += `${c.note}\n`;
+      if(c.amount) msg += `💰 ${c.amount}\n`;
+      msg += '\n';
+    });
+  }
+
+  if(e.cash) msg += `💵 *Cash Collected: ${fmt(e.cash)} incl. btw*\n`;
+  if(e.cashex) msg += `💵 Cash excl. btw: ${fmt(e.cashex)}\n`;
+  if(e.cashnote) msg += `📝 ${e.cashnote}\n`;
+  if(e.reflectie) msg += `\n💭 *Reflectie:* ${e.reflectie}\n`;
+
+  const encoded = encodeURIComponent(msg);
+  window.open(`https://wa.me/?text=${encoded}`, '_blank');
 }
 
 function deleteEod(id) {
