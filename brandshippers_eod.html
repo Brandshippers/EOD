@@ -553,6 +553,12 @@ function editEod(id) {
       if(c.type) {
         const opt = document.querySelector(`[data-cb="${id2}"][data-type="${c.type}"]`);
         if(opt) selectType(opt, c.type);
+        if(c.type==='close'||c.type==='followup') {
+          const cr = document.getElementById(`cb-cashrow-${id2}`);
+          if(cr) cr.style.display='grid';
+        }
+        if(c.cash) document.getElementById(`cb-cash-${id2}`).value = c.cash;
+        if(c.contracted) document.getElementById(`cb-contracted-${id2}`).value = c.contracted;
       }
     });
 
@@ -692,6 +698,9 @@ function selectType(el, type) {
   });
   el.classList.add(`selected-${type}`);
   document.getElementById(`cb-type-${cb}`).value = type;
+  // Show cash/contracted only for close or followup
+  const cashRow = document.getElementById(`cb-cashrow-${cb}`);
+  if(cashRow) cashRow.style.display = (type==='close'||type==='followup') ? 'grid' : 'none';
 }
 
 function submitEOD() {
